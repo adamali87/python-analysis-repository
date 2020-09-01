@@ -1,13 +1,15 @@
 import pandas as pd
 import numpy as np
 import math
+from math import erf, sqrt
+
 # from sklearn.linear_model import LinearRegression
 
 
 egyptData = pd.read_csv('C:/Users/adama/Desktop/egyptEconomy/data/egypt_economy_WorldBankData.csv')
 turkeyData = pd.read_csv('C:/Users/adama/Desktop/egyptEconomy/data/turkey_Data.csv')
 
-# egyptEconomy = egyptData[['RIR','GDP_Growth_Rate','Inflation']]
+# Means and Standard Deviations
 
 RIRmeanEG=egyptData['RIR'].mean()
 GDPmeanEG=egyptData['GDP_Growth_Rate'].mean()
@@ -24,9 +26,6 @@ INFstdEG=egyptData['Inflation'].std(ddof=1)
 RIRstdTK=turkeyData['RIR'].std(ddof=1)
 GDPstdTK=turkeyData['GDP_Growth_Rate'].std(ddof=1)
 INFstdTK=turkeyData['Inflation'].std(ddof=1)
-
-
-# Mean and Standard Deviation
 
 print('//////////////////////////////////////////')
 print('Egyptian National Economic Data 1976-2019')
@@ -68,3 +67,36 @@ def outlierTK():
 outlierEG()
 outlierTK()
 
+# Z-score and Percentile 
+
+allData = pd.concat([egyptData[['RIR','GDP_Growth_Rate',"Inflation"]], turkeyData[['RIR','GDP_Growth_Rate','Inflation']]])
+
+
+allDataRIRmean= allData['RIR'].mean()
+allDataGDPmean= allData['GDP_Growth_Rate'].mean()
+allDataINFmean= allData['Inflation'].mean()
+
+allDataRIRstd= allData['RIR'].std(ddof=1)
+allDataGDPstd= allData['GDP_Growth_Rate'].std(ddof=1)
+allDataINFstd= allData['Inflation'].std(ddof=1)
+
+def zscorePercentile(val, mean, std):
+    score = (val - mean)/std
+    p = 0.5*(1 + erf(score/sqrt(2)))
+    return p 
+
+def rirComparison(rir):
+    RIRpercentile = zscorePercentile(rir, allDataRIRmean, allDataRIRstd)
+    print(100*RIRpercentile)
+
+def gdpComparison(gdp):
+    GDPpercentile = zscorePercentile(gdp, allDataGDPmean, allDataGDPstd)
+    print(100*GDPpercentile)
+
+def infComparison(inf):
+    INFpercentile = 1 - zscorePercentile(inf, allDataINFmean, allDataINFstd)
+    print(100*INFpercentile)
+
+rirComparison(8)
+gdpComparison(0)
+infComparison(55)
